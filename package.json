@@ -1,0 +1,23 @@
+{
+  "name": "meme-ngine",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run ./src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@google/genai": "^1.18.0",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0"
+  }
+}
