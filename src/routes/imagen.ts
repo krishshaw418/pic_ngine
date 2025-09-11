@@ -33,10 +33,10 @@ async function ImaGen(input: InputFormatType): Promise<0 | 1 | -1> {
   formData.append("aspect_ratio", input.aspect_ratio);
 
   try {
-    const response = await fetch(`${process.env.IMAGEN_API}`, {
+    const response = await fetch(`${process.env.IMAGINE_ART_API}`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.API_TOKEN}`,
+        "Authorization": `Bearer ${process.env.IMAGINE_ART_API_KEY}`,
       },
       body: formData
     })
