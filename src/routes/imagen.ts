@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { Router, type Request, type Response } from "express";
 import * as z from "zod";
 import { v4 as uuidv4 } from "uuid";
+import { verifySignature } from "../middlewares/auth";
 
 const router = Router();
 
@@ -67,7 +68,7 @@ async function ImaGen(input: InputFormatType): Promise<0 | 1 | -1> {
   }
 }
 
-router.post("/imagen", async(req: Request, res: Response) => {
+router.post("/imagen", verifySignature, async(req: Request, res: Response) => {
   const input: InputFormatType = req.body;
   const result = await ImaGen(input);
   if(result != 1) {
