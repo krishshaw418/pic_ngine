@@ -10,7 +10,7 @@ const router = Router();
 
 const InputFormat = z.object({
   prompt: z.string(),
-  style: z.optional(z.enum(["anime"])),
+  style: z.enum(["anime", "flux-schnell", "flux-dev", "flux-dev-fast", "imagine-turbo", "realistic"]),
   aspect_ratio: z.optional(z.enum(["1:1", "16:9", "9:16"]))
 })
 
@@ -69,8 +69,11 @@ async function ImaGen(input: InputFormatType): Promise<0 | 1 | -1> {
 }
 
 router.post("/imagen", verifySignature, async(req: Request, res: Response) => {
-  const input: InputFormatType = req.body;
-  const result = await ImaGen(input);
+  const input = InputFormat.safeParse(req.body);
+  if(!input.success) {
+    return res.status(400).json({message: input.error.issues});
+  }
+  const result = await ImaGen(input.data);
   if(result != 1) {
     return res.status(500).json({message: "Operation failed!"});
   }
