@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { Router, type Request, type Response } from "express";
 import * as z from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { verifySignature } from "../middlewares/auth";
+// import { verifySignature } from "../middlewares/auth";
 
 const router = Router();
 
@@ -23,7 +23,7 @@ type ErrorFormat = {
 
 type InputFormatType = z.infer<typeof InputFormat>
 
-async function ImaGen(input: InputFormatType): Promise<0 | 1 | -1> {
+async function ImaGen(input: InputFormatType): Promise<1 | string> {
 
   const formData = new FormData();
   formData.append("prompt", input.prompt);
@@ -44,9 +44,9 @@ async function ImaGen(input: InputFormatType): Promise<0 | 1 | -1> {
     if(!response.ok) {
       if(contentType?.includes("application/json")) {
         const error = (await response.json()) as ErrorFormat;
-        console.log("code: ", error.code);
-        console.log("message: ", error.message);
-        return -1;
+        // console.log("code: ", error.code);
+        // console.log("message: ", error.message);
+        return error.message;
       }
     }
     if(contentType?.includes("image/png")){
@@ -59,25 +59,24 @@ async function ImaGen(input: InputFormatType): Promise<0 | 1 | -1> {
       const filePath = path.join(__dirname, "../images", fileName);
       fs.mkdirSync(path.dirname(filePath), { recursive: true });
       fs.writeFileSync(filePath, buffer);
-      return 1;
     }
     return 1;
   } catch (error) {
     console.log("Error", error);
-    return 0;
+    return "Internal server error!";
   }
 }
 
-router.post("/imagen", verifySignature, async(req: Request, res: Response) => {
+router.post("/imagen", async(req: Request, res: Response) => {
   const input = InputFormat.safeParse(req.body);
   if(!input.success) {
-    return res.status(400).json({message: input.error.issues});
+    return res.status(400).json({success: false, message: input.error.issues});
   }
   const result = await ImaGen(input.data);
   if(result != 1) {
-    return res.status(500).json({message: "Operation failed!"});
+    return res.status(403).json({success: "false", message: result});
   }
-  return res.status(200).json({message: "Image generated successfully!"});
+  return res.status(200).json({success: true, message: "Image generated successfully!"});
 })
 
 export default router;
