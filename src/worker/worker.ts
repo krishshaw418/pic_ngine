@@ -12,7 +12,12 @@ const worker = new Worker(
 );
 
 worker.on("completed", (job, returnedValue) => {
-    console.log(`Job ${job.id} processed successfully!`);
+    if(returnedValue !== 1) {
+        console.log(`Failed to process job ${job.id} due to: ${returnedValue}`)
+    }
+    else {
+        console.log(`Job ${job.id} processed successfully!`);
+    }
 });
 
 worker.on("failed", (job, err) => {
