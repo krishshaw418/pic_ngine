@@ -23,6 +23,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
+    "strictPropertyInitialization": false,
     "outDir": "dist"
   },
   "include": ["src"],

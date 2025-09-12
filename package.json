@@ -4,9 +4,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun --watch src/index.ts",
+    "dev:api": "bun src/index.ts",
+    "dev:worker": "bun src/worker/worker.ts",
     "build": "tsc",
-    "start": "bun dist/index.js"
+    "start": "bun dist/index.js",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -17,8 +19,10 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "bullmq": "^5.58.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "ioredis": "^5.7.0",
     "uuid": "^13.0.0",
     "zod": "^4.1.5"
   }

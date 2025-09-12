@@ -1,10 +1,7 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { Router, type Request, type Response } from "express";
 import * as z from "zod";
-import { v4 as uuidv4 } from "uuid";
-// import { verifySignature } from "../middlewares/auth";
+import { requestQueue } from "../queue/queue";
+import { verifySignature } from "../middlewares/auth";
 
 const router = Router();
 
@@ -14,69 +11,28 @@ const InputFormat = z.object({
   aspect_ratio: z.optional(z.enum(["1:1", "16:9", "9:16"]))
 })
 
-type ErrorFormat = {
-  code: number,
-  error: string,
-  message: string,
-  status: string
-}
-
-type InputFormatType = z.infer<typeof InputFormat>
-
-async function ImaGen(input: InputFormatType): Promise<1 | string> {
-
-  const formData = new FormData();
-  formData.append("prompt", input.prompt);
-  if(input.style)
-  formData.append("style", input.style);
-  if(input.aspect_ratio)
-  formData.append("aspect_ratio", input.aspect_ratio);
-
-  try {
-    const response = await fetch(`${process.env.IMAGINE_ART_API}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.IMAGINE_ART_API_KEY}`,
-      },
-      body: formData
-    })
-    const contentType = await response.headers.get("content-type");
-    if(!response.ok) {
-      if(contentType?.includes("application/json")) {
-        const error = (await response.json()) as ErrorFormat;
-        // console.log("code: ", error.code);
-        // console.log("message: ", error.message);
-        return error.message;
-      }
-    }
-    if(contentType?.includes("image/png")){
-      const data = await response.blob();
-      const arrayBuffer = await data.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const fileName = `${uuidv4()}.png`;
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
-      const filePath = path.join(__dirname, "../images", fileName);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, buffer);
-    }
-    return 1;
-  } catch (error) {
-    console.log("Error", error);
-    return "Internal server error!";
-  }
-}
-
-router.post("/imagen", async(req: Request, res: Response) => {
+router.post("/imagen", verifySignature, async(req: Request, res: Response) => {
   const input = InputFormat.safeParse(req.body);
   if(!input.success) {
     return res.status(400).json({success: false, message: input.error.issues});
   }
-  const result = await ImaGen(input.data);
-  if(result != 1) {
-    return res.status(403).json({success: "false", message: result});
+  try {
+    const job = await requestQueue.add("generate", input.data, {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 2000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+
+    return res.status(200).json({
+      success: true,
+      jobId: job.id,
+      message: "Your request is added to the queue!",
+    });
+  } catch (error) {
+    console.error("Queue error:", error);
+    res.status(500).json({success: "false", message: "Failed to add request to the queue."})
   }
-  return res.status(200).json({success: true, message: "Image generated successfully!"});
 })
 
 export default router;
