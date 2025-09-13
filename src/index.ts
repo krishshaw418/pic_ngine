@@ -9,18 +9,11 @@ app.use(express.json({
 }));
 const port = process.env.PORT || 3000;
 import imagenRouter from "./routes/imagen";
-
-app.use((err: any, req: Express.Request, res: express.Response, next: express.NextFunction) => {
-  if (err instanceof SyntaxError && "body" in err) {
-    return res.status(400).json({
-      error: "Invalid JSON format",
-      message: err.message
-    });
-  }
-  next(err);
-});
+import { syntaxErrorHandler } from "./middlewares/errorhandler";
 
 app.use("/api", imagenRouter);
+
+app.use(syntaxErrorHandler);
 
 app.listen(port, () => {
     console.log(`Listening at port ${port} ...`);
