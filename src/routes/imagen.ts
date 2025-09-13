@@ -11,7 +11,7 @@ const InputFormat = z.object({
   aspect_ratio: z.optional(z.enum(["1:1", "16:9", "9:16"]))
 })
 
-router.post("/imagen", verifySignature, async(req: Request, res: Response) => {
+router.post("/imagen", async(req: Request, res: Response) => {
   const input = InputFormat.safeParse(req.body);
   if(!input.success) {
     return res.status(400).json({success: false, message: input.error.issues});

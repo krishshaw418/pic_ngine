@@ -13,7 +13,7 @@ const worker = new Worker(
 
 worker.on("completed", (job, returnedValue) => {
     if(returnedValue !== 1) {
-        console.log(`Failed to process job ${job.id} due to: ${returnedValue}`)
+        console.log(`Failed to process request with jobId ${job.id} due to: ${returnedValue}`);
     }
     else {
         console.log(`Job ${job.id} processed successfully!`);
