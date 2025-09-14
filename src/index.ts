@@ -2,11 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 const app = express();
-app.use(express.json({
-    verify: (req, buf) => {
-        (req as any).rawBody = buf.toString();
-    }
-}));
+app.use(express.json());
 const port = process.env.PORT || 3000;
 import imagenRouter from "./routes/imagen";
 import { syntaxErrorHandler } from "./middlewares/errorhandler";
