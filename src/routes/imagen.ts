@@ -8,7 +8,8 @@ const router = Router();
 const InputFormat = z.object({
   prompt: z.string(),
   style: z.enum(["anime", "flux-schnell", "flux-dev", "flux-dev-fast", "imagine-turbo", "realistic"]),
-  aspect_ratio: z.optional(z.enum(["1:1", "16:9", "9:16"]))
+  aspect_ratio: z.optional(z.enum(["1:1", "16:9", "9:16"])),
+  chatId: z.number()
 })
 
 router.post("/imagen", verifySignature, async(req: Request, res: Response) => {

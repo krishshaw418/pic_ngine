@@ -4,8 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev:api": "bun src/index.ts",
-    "dev:worker": "bun src/worker/worker.ts",
+    "dev": "bun src/index.ts",
     "build": "tsc",
     "start": "bun dist/index.js",
     "clean": "rm -rf dist"
